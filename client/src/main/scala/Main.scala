@@ -54,8 +54,8 @@ class View(model: ObservableBuffer[TaskFX]) {
   import Main.tasks
 
   val createButton = new Button("+")
-  val saveButton = new Button("Save")
-  val loadButton = new Button("Load")
+//  val saveButton = new Button("Save")
+//  val loadButton = new Button("Load")
   val deleteMenuItem = new MenuItem("Delete")
   val tableContextMenu: ContextMenu = new ContextMenu(deleteMenuItem)
 
@@ -89,18 +89,26 @@ class View(model: ObservableBuffer[TaskFX]) {
     columnResizePolicy = TableView.ConstrainedResizePolicy
   }
 
-  val hBox = new HBox(createButton, saveButton, loadButton)
+  val hBox = new HBox(createButton)//, saveButton, loadButton)
   val vbox = new VBox(table, hBox)
 
 }
 
 class Presenter(view: View, model: ObservableBuffer[TaskFX]) {
 
-  model.foreach(_.isDoneProperty.onChange((source, oldValue, newValue) =>
-    println(s"$source $oldValue $newValue")))
+  model.foreach(task => task.isDoneProperty.onChange((source, oldValue, newValue) =>
+      {
+        model.set(model.indexOf(task), new TaskFX(task.id, newValue, task.text))
+        println(s"$source $oldValue $newValue")
+      }
+    )
+  )
 
   model.foreach(_.textProperty.onChange((source, oldValue, newValue) =>
-    println(s"$source $oldValue $newValue")))
+    {
+      println(s"$source $oldValue $newValue")
+    }
+  ))
 
 
   val createHandler: EventHandler[ActionEvent] = (_: ActionEvent) => {
@@ -111,8 +119,8 @@ class Presenter(view: View, model: ObservableBuffer[TaskFX]) {
     task.textProperty.onChange((source, oldValue, newValue) =>
       println(s"$source $oldValue $newValue"))
 
-    println(model.toList)
     model.+=(task)
+    println(model.toList)
   }
 
   val deleteHandler: EventHandler[ActionEvent] = (_: ActionEvent) => {
@@ -122,62 +130,29 @@ class Presenter(view: View, model: ObservableBuffer[TaskFX]) {
     if (row >= 0) model.remove(row)
   }
 
-  val saveHandler: EventHandler[ActionEvent] = (_: ActionEvent) => {
-    System.out.println("Save")
-  }
-
-  val loadHandler: EventHandler[ActionEvent] = (_: ActionEvent) => {
-    System.out.println("Load")
-  }
-
-  val blaHandler: EventHandler[
-    javafx.scene.control.TableColumn.CellEditEvent[TaskFX, java.lang.Boolean]] =
-    (_: javafx.scene.control.TableColumn.CellEditEvent[TaskFX,
-                                                       java.lang.Boolean]) => {
-      System.out.println("edit done1")
-    }
-
-  val blaHandler2: EventHandler[
+  val editHandler: EventHandler[
     javafx.scene.control.TableColumn.CellEditEvent[TaskFX, String]] =
-    (_: javafx.scene.control.TableColumn.CellEditEvent[TaskFX, String]) => {
+    (x: javafx.scene.control.TableColumn.CellEditEvent[TaskFX, String]) => {
+      val task = x.getRowValue
+      val row = x.getTablePosition.getRow
+      val newText = x.getNewValue
+
+      model.set(row, new TaskFX(task.id, task.isDone, newText))
       System.out.println("edit done2")
     }
 
-  val foo = (me: MouseEvent) => {
-    me.eventType match {
-      case MouseEvent.MouseClicked => {}
-      case MouseEvent.MouseDragged => {}
-      case _                       => {}
-    }
-  }
-
-
+//  val saveHandler: EventHandler[ActionEvent] = (_: ActionEvent) => {
+//    System.out.println("Save")
+//  }
+//
+//  val loadHandler: EventHandler[ActionEvent] = (_: ActionEvent) => {
+//    System.out.println("Load")
+//  }
 
   view.createButton.onAction = createHandler
   view.deleteMenuItem.onAction = deleteHandler
-  view.saveButton.onAction = saveHandler
-  view.loadButton.onAction = loadHandler
-
-//  view.doneColumn.addEventHandler(MouseEvent.MouseClicked, fooHandler)
-
-  import javafx.scene.{control => jfxsc, input => jfxsi}
-  import javafx.{event => jfxe}
-
-//  view.textColumn.addEventHandler(jfxsi.MouseEvent.MOUSE_ENTERED,
-//    new jfxe.EventHandler[jfxsi.MouseEvent]() {
-//      @Override
-//      def handle(me: jfxsi.MouseEvent) {
-//        println("HOIHOI")
-//      }
-//    })
-//  view.textColumn.handleEvent(jfxsi.MouseEvent.MOUSE_ENTERED)
-//  view.doneColumn.onEditStart = blaHandler
-//  view.doneColumn.setOnEditCommit(blaHandler)
-//  view.doneColumn.onEditCommit = blaHandler
-
-
-
-
-//  view.textColumn.onEditCommit = blaHandler2
+//  view.saveButton.onAction = saveHandler
+//  view.loadButton.onAction = loadHandler
+  view.textColumn.onEditCommit = editHandler
 
 }
