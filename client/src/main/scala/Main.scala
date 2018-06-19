@@ -1,6 +1,7 @@
 import java.util.UUID
 
 import javafx.event.{ActionEvent, EventHandler}
+import models.{Task, TaskFX}
 import scalafx.application.JFXApp
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.beans.property.{BooleanProperty, StringProperty}
@@ -12,19 +13,27 @@ import scalafx.scene.control._
 import scalafx.scene.control.cell.{CheckBoxTableCell, TextFieldTableCell}
 import scalafx.scene.layout.{HBox, VBox}
 
-class Note(id: UUID, isDone_ : Boolean, text_ : String) {
-  val isDone =
-    new BooleanProperty(bean = this, name = "isDone", initialValue = isDone_)
-  val text =
-    new StringProperty(bean = this, name = "text", initialValue = text_)
-  isDone.onChange((source, oldValue, newValue) =>
-    println(s"$source $oldValue $newValue"))
-  text.onChange((source, oldValue, newValue) =>
-    println(s"$source $oldValue $newValue"))
+object models {
+  case class Task(id: UUID, isDone: Boolean, text: String)
+
+  implicit class RichTask(task: Task) {
+    def toTaskFX = new TaskFX(task.id, task.isDone, task.text)
+  }
+
+  class TaskFX(id: UUID, isDone: Boolean, text: String)
+      extends Task(id, isDone, text) {
+    val isDoneProperty =
+      new BooleanProperty(bean = this, name = "isDone", initialValue = isDone)
+    val textProperty =
+      new StringProperty(bean = this, name = "text", initialValue = text)
+    isDoneProperty.onChange((source, oldValue, newValue) =>
+      println(s"$source $oldValue $newValue"))
+    textProperty.onChange((source, oldValue, newValue) =>
+      println(s"$source $oldValue $newValue"))
+  }
 }
 
 object Main extends JFXApp {
-
   val view = new View
   val presenter = new Presenter(view)
   stage = new PrimaryStage {
@@ -36,31 +45,28 @@ object Main extends JFXApp {
 }
 
 class View {
-  val data = ObservableBuffer[Note](new Note(UUID.randomUUID(), false, "hoi"),
-                                    new Note(UUID.randomUUID(), true, "doei"))
+  val tasks = ObservableBuffer[TaskFX](
+    new TaskFX(UUID.randomUUID(), false, "hoi"),
+    new TaskFX(UUID.randomUUID(), true, "doei"))
 
   val createButton = new Button("+")
   val saveButton = new Button("Save")
   val loadButton = new Button("Load")
-  val deleteMenuItem = new MenuItem("delete")
+  val deleteMenuItem = new MenuItem("Delete")
   val tableContextMenu: ContextMenu = new ContextMenu(deleteMenuItem)
 
-  val table = new TableView[Note](data) {
+  val table = new TableView[TaskFX](tasks) {
     columns ++= List(
-      new TableColumn[Note, java.lang.Boolean] {
+      new TableColumn[TaskFX, java.lang.Boolean] {
         text = "Done"
-        cellValueFactory = _.value.isDone
+        cellValueFactory = _.value.isDoneProperty
           .asInstanceOf[ObservableValue[java.lang.Boolean, java.lang.Boolean]]
         cellFactory = CheckBoxTableCell.forTableColumn(this)
-        editable = true
-
       },
-      new TableColumn[Note, String] {
+      new TableColumn[TaskFX, String] {
         text = "Text"
-        cellFactory = TextFieldTableCell.forTableColumn[Note]()
-        cellValueFactory = { _.value.text }
-        contextMenu = tableContextMenu
-        editable = true
+        cellFactory = TextFieldTableCell.forTableColumn[TaskFX]()
+        cellValueFactory = { _.value.textProperty }
       }
     )
     contextMenu = tableContextMenu
@@ -69,7 +75,6 @@ class View {
   }
 
   val hBox = new HBox(createButton, saveButton, loadButton)
-
   val vbox = new VBox(table, hBox)
 
 }
@@ -78,15 +83,15 @@ class Presenter(view: View) {
 
   val createHandler: EventHandler[ActionEvent] = (_: ActionEvent) => {
     System.out.println("Create")
-    val note = new Note(UUID.randomUUID(), isDone_ = false, text_ = "")
-    view.data.+=(note)
+    val task = new TaskFX(UUID.randomUUID(), isDone = false, text = "")
+    view.tasks.+=(task)
   }
 
   val deleteHandler: EventHandler[ActionEvent] = (_: ActionEvent) => {
     println("Delete")
     val row = view.table.getFocusModel.getFocusedCell.getRow
     println(row)
-    view.data.remove(row)
+    if (row >= 0) view.tasks.remove(row)
   }
 
   val saveHandler: EventHandler[ActionEvent] = (_: ActionEvent) => {
