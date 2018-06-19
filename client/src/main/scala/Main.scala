@@ -7,10 +7,12 @@ import scalafx.application.JFXApp.PrimaryStage
 import scalafx.beans.property.{BooleanProperty, StringProperty}
 import scalafx.beans.value.ObservableValue
 import scalafx.collections.ObservableBuffer
+import scalafx.event.EventHandlerDelegate
 import scalafx.scene.Scene
 import scalafx.scene.control.TableColumn._
 import scalafx.scene.control._
 import scalafx.scene.control.cell.{CheckBoxTableCell, TextFieldTableCell}
+import scalafx.scene.input.MouseEvent
 import scalafx.scene.layout.{HBox, VBox}
 
 object models {
@@ -26,16 +28,20 @@ object models {
       new BooleanProperty(bean = this, name = "isDone", initialValue = isDone)
     val textProperty =
       new StringProperty(bean = this, name = "text", initialValue = text)
-    isDoneProperty.onChange((source, oldValue, newValue) =>
-      println(s"$source $oldValue $newValue"))
-    textProperty.onChange((source, oldValue, newValue) =>
-      println(s"$source $oldValue $newValue"))
+//    isDoneProperty.onChange((source, oldValue, newValue) =>
+//      println(s"$source $oldValue $newValue"))
+//    textProperty.onChange((source, oldValue, newValue) =>
+//      println(s"$source $oldValue $newValue"))
   }
 }
 
 object Main extends JFXApp {
-  val view = new View
-  val presenter = new Presenter(view)
+  val tasks: ObservableBuffer[TaskFX] = ObservableBuffer[TaskFX](
+    new TaskFX(UUID.randomUUID(), false, "hoi"),
+    new TaskFX(UUID.randomUUID(), true, "doei"))
+  val view = new View(tasks)
+
+  val presenter = new Presenter(view, tasks)
   stage = new PrimaryStage {
     title = "My application"
     scene = new Scene {
@@ -44,10 +50,8 @@ object Main extends JFXApp {
   }
 }
 
-class View {
-  val tasks = ObservableBuffer[TaskFX](
-    new TaskFX(UUID.randomUUID(), false, "hoi"),
-    new TaskFX(UUID.randomUUID(), true, "doei"))
+class View(model: ObservableBuffer[TaskFX]) {
+  import Main.tasks
 
   val createButton = new Button("+")
   val saveButton = new Button("Save")
@@ -55,19 +59,30 @@ class View {
   val deleteMenuItem = new MenuItem("Delete")
   val tableContextMenu: ContextMenu = new ContextMenu(deleteMenuItem)
 
+  val blaHandler: EventHandler[
+    javafx.scene.control.TableColumn.CellEditEvent[TaskFX, java.lang.Boolean]] =
+    (_: javafx.scene.control.TableColumn.CellEditEvent[TaskFX,
+                                                       java.lang.Boolean]) => {
+      System.out.println("edit done1")
+    }
+
+  val doneColumn = new TableColumn[TaskFX, java.lang.Boolean] {
+    text = "Done"
+    cellValueFactory = _.value.isDoneProperty
+      .asInstanceOf[ObservableValue[java.lang.Boolean, java.lang.Boolean]]
+    cellFactory = CheckBoxTableCell.forTableColumn(this)
+    onEditCommit = blaHandler
+  }
+  val textColumn = new TableColumn[TaskFX, String] {
+    text = "Text"
+    cellFactory = TextFieldTableCell.forTableColumn[TaskFX]()
+    cellValueFactory = { _.value.textProperty }
+  }
+
   val table = new TableView[TaskFX](tasks) {
     columns ++= List(
-      new TableColumn[TaskFX, java.lang.Boolean] {
-        text = "Done"
-        cellValueFactory = _.value.isDoneProperty
-          .asInstanceOf[ObservableValue[java.lang.Boolean, java.lang.Boolean]]
-        cellFactory = CheckBoxTableCell.forTableColumn(this)
-      },
-      new TableColumn[TaskFX, String] {
-        text = "Text"
-        cellFactory = TextFieldTableCell.forTableColumn[TaskFX]()
-        cellValueFactory = { _.value.textProperty }
-      }
+      doneColumn,
+      textColumn
     )
     contextMenu = tableContextMenu
     editable = true
@@ -79,19 +94,32 @@ class View {
 
 }
 
-class Presenter(view: View) {
+class Presenter(view: View, model: ObservableBuffer[TaskFX]) {
+
+  model.foreach(_.isDoneProperty.onChange((source, oldValue, newValue) =>
+    println(s"$source $oldValue $newValue")))
+
+  model.foreach(_.textProperty.onChange((source, oldValue, newValue) =>
+    println(s"$source $oldValue $newValue")))
+
 
   val createHandler: EventHandler[ActionEvent] = (_: ActionEvent) => {
     System.out.println("Create")
     val task = new TaskFX(UUID.randomUUID(), isDone = false, text = "")
-    view.tasks.+=(task)
+    task.isDoneProperty.onChange((source, oldValue, newValue) =>
+      println(s"$source $oldValue $newValue"))
+    task.textProperty.onChange((source, oldValue, newValue) =>
+      println(s"$source $oldValue $newValue"))
+
+    println(model.toList)
+    model.+=(task)
   }
 
   val deleteHandler: EventHandler[ActionEvent] = (_: ActionEvent) => {
     println("Delete")
     val row = view.table.getFocusModel.getFocusedCell.getRow
     println(row)
-    if (row >= 0) view.tasks.remove(row)
+    if (row >= 0) model.remove(row)
   }
 
   val saveHandler: EventHandler[ActionEvent] = (_: ActionEvent) => {
@@ -102,9 +130,54 @@ class Presenter(view: View) {
     System.out.println("Load")
   }
 
+  val blaHandler: EventHandler[
+    javafx.scene.control.TableColumn.CellEditEvent[TaskFX, java.lang.Boolean]] =
+    (_: javafx.scene.control.TableColumn.CellEditEvent[TaskFX,
+                                                       java.lang.Boolean]) => {
+      System.out.println("edit done1")
+    }
+
+  val blaHandler2: EventHandler[
+    javafx.scene.control.TableColumn.CellEditEvent[TaskFX, String]] =
+    (_: javafx.scene.control.TableColumn.CellEditEvent[TaskFX, String]) => {
+      System.out.println("edit done2")
+    }
+
+  val foo = (me: MouseEvent) => {
+    me.eventType match {
+      case MouseEvent.MouseClicked => {}
+      case MouseEvent.MouseDragged => {}
+      case _                       => {}
+    }
+  }
+
+
+
   view.createButton.onAction = createHandler
   view.deleteMenuItem.onAction = deleteHandler
   view.saveButton.onAction = saveHandler
   view.loadButton.onAction = loadHandler
+
+//  view.doneColumn.addEventHandler(MouseEvent.MouseClicked, fooHandler)
+
+  import javafx.scene.{control => jfxsc, input => jfxsi}
+  import javafx.{event => jfxe}
+
+//  view.textColumn.addEventHandler(jfxsi.MouseEvent.MOUSE_ENTERED,
+//    new jfxe.EventHandler[jfxsi.MouseEvent]() {
+//      @Override
+//      def handle(me: jfxsi.MouseEvent) {
+//        println("HOIHOI")
+//      }
+//    })
+//  view.textColumn.handleEvent(jfxsi.MouseEvent.MOUSE_ENTERED)
+//  view.doneColumn.onEditStart = blaHandler
+//  view.doneColumn.setOnEditCommit(blaHandler)
+//  view.doneColumn.onEditCommit = blaHandler
+
+
+
+
+//  view.textColumn.onEditCommit = blaHandler2
 
 }

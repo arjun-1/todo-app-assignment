@@ -5,7 +5,7 @@ object Main extends App {
 
   val repositories = new Db
   val service = new TaskService(repositories)
-  val foo = Await.result(service.get(), 10 seconds)
+  val foo = Await.result(service.get().value, 10 seconds)
   println(foo)
 
 }

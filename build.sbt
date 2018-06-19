@@ -16,6 +16,7 @@ lazy val server = (project in file("server"))
     name := "server",
     version := "0.1",
     libraryDependencies ++= Seq(
+      "org.typelevel" %% "cats-core" % "1.0.1",
       "com.typesafe.akka" %% "akka-stream" % "2.5.13",
       "com.typesafe.akka" %% "akka-http" % "10.1.3",
       "com.typesafe.akka" %% "akka-http-testkit" % "10.1.3" % Test,
@@ -29,4 +30,4 @@ lazy val server = (project in file("server"))
 lazy val root = (project in file(".")).aggregate(client, server)
 
 scalafmtOnCompile in ThisBuild := true
-//scalacOptions += "-Ypartial-unification"
+scalacOptions += "-Ypartial-unification"
