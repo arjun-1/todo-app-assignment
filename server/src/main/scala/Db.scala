@@ -1,10 +1,6 @@
 import java.util.UUID
-
-import slick.jdbc.H2Profile.api._
-import slick.jdbc.H2Profile.api._
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Await, Future}
+//import slick.jdbc.H2Profile.api._
+import slick.jdbc.PostgresProfile.api._
 
 class Db {
 
@@ -14,7 +10,8 @@ class Db {
     def isDone = column[Boolean]("is_done")
     def text = column[String]("text")
 
-    def * = (id.?, isDone, text) <> ((Task.apply _).tupled, Task.unapply)
+    def * =
+      (id.?, userId.?, isDone, text) <> ((Task.apply _).tupled, Task.unapply)
   }
 
   val taskTable = TableQuery[Tasks]
@@ -25,7 +22,11 @@ class Db {
       taskTable.filter(_.id === taskId).result.headOption
     def getByUserId(userID: UUID): DBIO[Seq[Task]] =
       taskTable.filter(_.userId === userID).result
+    def update(taskId: UUID, task: Task): DBIO[Int] =
+      taskTable.filter(_.id === taskId).update(task)
     def insert(task: Task): DBIO[Int] = taskTable += task
+    def delete(taskId: UUID): DBIO[Int] =
+      taskTable.filter(_.id === taskId).delete
   }
 
 }
