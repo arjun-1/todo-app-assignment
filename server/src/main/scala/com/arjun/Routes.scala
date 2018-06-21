@@ -16,17 +16,19 @@ trait Routes extends ArgonautSupport {
 
   def taskService: TaskService
 
-  def completeResult[A](statusCode: StatusCode, result: EitherT[Future, String, A])(
-      implicit encoder: EncodeJson[A]) = onComplete(result.value) {
-    case Success(Right(success)) => complete(statusCode -> success)
-    case Success(Left(error)) =>
-      complete(StatusCodes.InternalServerError -> error)
-    case Failure(error) =>
-      complete(StatusCodes.InternalServerError -> error.getLocalizedMessage)
-  }
+  def completeResult[A](
+      statusCode: StatusCode,
+      result: EitherT[Future, String, A])(implicit encoder: EncodeJson[A]) =
+    onComplete(result.value) {
+      case Success(Right(success)) => complete(statusCode -> success)
+      case Success(Left(error)) =>
+        complete(StatusCodes.InternalServerError -> error)
+      case Failure(error) =>
+        complete(StatusCodes.InternalServerError -> error.getLocalizedMessage)
+    }
 
   val route = {
-    path ("tasks") {
+    path("tasks") {
       get {
         completeResult(StatusCodes.OK, taskService.get())
       } ~ post {
