@@ -33,7 +33,7 @@ lazy val serverclient = (project in file("server/client"))
       "com.typesafe.akka" %% "akka-http" % "10.1.3",
       "com.typesafe.akka" %% "akka-http-testkit" % "10.1.3" % Test,
     )
-  )
+  ).dependsOn(serverserver)
 
 lazy val client = (project in file("client"))
   .settings(
