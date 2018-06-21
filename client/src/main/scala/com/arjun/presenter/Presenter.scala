@@ -8,53 +8,45 @@ import javafx.event.{ActionEvent, EventHandler}
 import scalafx.collections.ObservableBuffer
 import scalafx.event.subscriptions.Subscription
 
-import scala.annotation.tailrec
-
 class Presenter(view: View, model: ObservableBuffer[TaskFX]) {
 
-  def addIsDoneListener(task: TaskFX): Subscription = task.isDoneProperty.onChange(
-    (source, oldValue, newValue) => {
-    val newTask = task.copy(isDone = newValue)
+  def subscribeIsDone(task: TaskFX): Subscription = task.isDoneProperty.onChange(
+    (_, _, newIsDone) => {
+    val newTask = task.copy(isDone = newIsDone)
+    subscribeIsDone(newTask)
     model.set(model.indexOf(task), newTask)
-    println(s"$source $oldValue $newValue")
-    addIsDoneListener(newTask)
+    println(model)
   })
 
-  model.foreach(addIsDoneListener)
-  model.foreach(_.textProperty.onChange((source, oldValue, newValue) => {
-    println(s"$source $oldValue $newValue")
-  }))
+  model.foreach(subscribeIsDone)
 
   val createHandler: EventHandler[ActionEvent] = (_: ActionEvent) => {
     System.out.println("Create")
     val task = TaskFX(UUID.randomUUID(), isDone = false, text = "")
-    addIsDoneListener(task)
-
-    task.textProperty.onChange((source, oldValue, newValue) =>
-      println(s"$source $oldValue $newValue"))
-
-    model.+=(task)
-    println(model.toList)
+    subscribeIsDone(task)
+    model += task
+    println(model)
   }
 
   val deleteHandler: EventHandler[ActionEvent] = (_: ActionEvent) => {
     println("Delete")
     val row = view.table.getFocusModel.getFocusedCell.getRow
-    println(row)
     if (row >= 0) model.remove(row)
+    println(model)
   }
 
   val editHandler: EventHandler[
     javafx.scene.control.TableColumn.CellEditEvent[TaskFX, String]] =
     (cellEditEvent: javafx.scene.control.TableColumn.CellEditEvent[TaskFX,
                                                                    String]) => {
+      println("Edit")
       val task = cellEditEvent.getRowValue
       val row = cellEditEvent.getTablePosition.getRow
       val newText = cellEditEvent.getNewValue
-
-      model.set(row, task.copy(text = newText))
+      val newTask = task.copy(text = newText)
+      subscribeIsDone(newTask)
+      model.set(row, newTask)
       println(model)
-      System.out.println("edit done2")
     }
 
   view.createButton.onAction = createHandler
