@@ -36,7 +36,11 @@ trait Routes extends ArgonautSupport {
       } ~ post {
         entity(as[Task]) { task =>
           // Todo: extract userId from auth header
-          completeResult(StatusCodes.OK, taskService.insert(UUID.fromString("6d453fe9-09f7-442d-b50c-4487a8ea8db4"), task))
+          completeResult(
+            StatusCodes.OK,
+            taskService.insert(
+              UUID.fromString("6d453fe9-09f7-442d-b50c-4487a8ea8db4"),
+              task))
         }
       }
     } ~ path("tasks" / PathMatchers.JavaUUID) { taskId =>

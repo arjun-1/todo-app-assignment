@@ -2,10 +2,10 @@ import sbt.Keys.libraryDependencies
 
 lazy val commonSettings = Seq(scalaVersion := "2.12.6")
 
-lazy val server = (project in file("server"))
+lazy val serverserver = (project in file("server/server"))
   .settings(
     commonSettings,
-    name := "server",
+    name := "serverserver",
     version := "0.1",
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-core" % "1.0.1",
@@ -21,6 +21,19 @@ lazy val server = (project in file("server"))
       "org.flywaydb" % "flyway-core" % "5.1.1"
     )
   )
+lazy val serverclient = (project in file("server/client"))
+  .settings(
+    commonSettings,
+    name := "serverclient",
+    version := "0.1",
+    libraryDependencies ++= Seq(
+      "org.typelevel" %% "cats-core" % "1.0.1",
+      "de.heikoseeberger" %% "akka-http-argonaut" % "1.21.0",
+      "com.github.alexarchambault" %% "argonaut-shapeless_6.2" % "1.2.0-M4",
+      "com.typesafe.akka" %% "akka-http" % "10.1.3",
+      "com.typesafe.akka" %% "akka-http-testkit" % "10.1.3" % Test,
+    )
+  )
 
 lazy val client = (project in file("client"))
   .settings(
@@ -30,9 +43,9 @@ lazy val client = (project in file("client"))
     libraryDependencies += "org.scalafx" %% "scalafx" % "8.0.144-R12",
     fork in run := true
   )
-  .dependsOn(server)
+  .dependsOn(serverserver)
 
-lazy val root = (project in file(".")).aggregate(client, server)
+lazy val root = (project in file(".")).aggregate(client, serverserver)
 
 scalafmtOnCompile in ThisBuild := true
 scalacOptions += "-Ypartial-unification"
