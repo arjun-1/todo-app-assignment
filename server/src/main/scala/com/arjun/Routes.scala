@@ -1,6 +1,6 @@
 package com.arjun
 
-import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.{StatusCode, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.PathMatchers
 import argonaut.Argonaut._
@@ -16,9 +16,9 @@ trait Routes extends ArgonautSupport {
 
   def taskService: TaskService
 
-  def completeResult[A](result: EitherT[Future, String, A])(
+  def completeResult[A](statusCode: StatusCode, result: EitherT[Future, String, A])(
       implicit encoder: EncodeJson[A]) = onComplete(result.value) {
-    case Success(Right(success)) => complete(StatusCodes.OK -> success)
+    case Success(Right(success)) => complete(statusCode -> success)
     case Success(Left(error)) =>
       complete(StatusCodes.InternalServerError -> error)
     case Failure(error) =>
@@ -26,26 +26,26 @@ trait Routes extends ArgonautSupport {
   }
 
   val route = {
-    pathPrefix("tasks") {
+    path ("tasks") {
       get {
-        completeResult(taskService.get())
+        completeResult(StatusCodes.OK, taskService.get())
+      } ~ post {
+        entity(as[Task]) { task =>
+          completeResult(StatusCodes.OK, taskService.insert(task))
+        }
       }
-    } ~ path(PathMatchers.JavaUUID) { taskId =>
+    } ~ path("tasks" / PathMatchers.JavaUUID) { taskId =>
       get {
-        completeResult(taskService.getByTaskId(taskId))
+        completeResult(StatusCodes.OK, taskService.getByTaskId(taskId))
       } ~ put {
         entity(as[Task]) { task =>
-          completeResult(taskService.update(taskId, task))
+          completeResult(StatusCodes.OK, taskService.update(taskId, task))
         }
       } ~ delete {
-        completeResult(taskService.delete(taskId))
-      }
-    } ~ post {
-      entity(as[Task]) { task =>
-        completeResult(taskService.insert(task))
+        completeResult(StatusCodes.NoContent, taskService.delete(taskId))
       }
     } ~ path("users" / PathMatchers.JavaUUID / "tasks") { userId =>
-      completeResult(taskService.getByUserId(userId))
+      completeResult(StatusCodes.OK, taskService.getByUserId(userId))
     }
   }
 

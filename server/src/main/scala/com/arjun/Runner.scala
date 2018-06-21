@@ -18,6 +18,13 @@ object Runner extends App with Routes {
   implicit val executionContext = system.dispatcher
 
   val repositories = new Db(slick.jdbc.PostgresProfile)
-  val taskService = new TaskService(repositories)
+
+  import slick.jdbc.PostgresProfile.api._
+  //  val db = Database.forConfig("h2mem1")
+  val db = Database.forURL("jdbc:postgresql://localhost:5432/postgres",
+    driver = "org.postgresql.Driver",
+    user = "postgres",
+    password = "password")
+  val taskService = new TaskService(repositories, db)
   Http().bindAndHandle(route, "localhost", 8080)
 }
