@@ -17,7 +17,7 @@ object Runner extends App with Routes {
   implicit val materializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
 
-  val repositories = new Db
+  val repositories = new Db(slick.jdbc.PostgresProfile)
   val taskService = new TaskService(repositories)
   Http().bindAndHandle(route, "localhost", 8080)
 }
