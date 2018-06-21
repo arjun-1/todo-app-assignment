@@ -1,9 +1,11 @@
+package com.arjun
+
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import org.flywaydb.core.Flyway
 
-object Main extends App with Routes {
+object Runner extends App with Routes {
 
   val flyway = new Flyway()
   flyway.setDataSource("jdbc:postgresql://localhost:5432/postgres",
