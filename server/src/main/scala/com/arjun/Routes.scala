@@ -1,5 +1,7 @@
 package com.arjun
 
+import java.util.UUID
+
 import akka.http.scaladsl.model.{StatusCode, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.PathMatchers
@@ -33,7 +35,8 @@ trait Routes extends ArgonautSupport {
         completeResult(StatusCodes.OK, taskService.get())
       } ~ post {
         entity(as[Task]) { task =>
-          completeResult(StatusCodes.OK, taskService.insert(task))
+          // Todo: extract userId from auth header
+          completeResult(StatusCodes.OK, taskService.insert(UUID.fromString("6d453fe9-09f7-442d-b50c-4487a8ea8db4"), task))
         }
       }
     } ~ path("tasks" / PathMatchers.JavaUUID) { taskId =>

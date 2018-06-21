@@ -18,14 +18,14 @@ class TaskService(repositories: Db, db: JdbcProfile#API#Database) {
                         "task not found")
   def getByUserId(userID: UUID): EitherT[Future, String, List[Task]] =
     EitherT.right(db.run(repositories.tasks.getByUserId(userID)).map(_.toList))
-  def insert(task: Task): EitherT[Future, String, Task] =
+  def insert(userId: UUID, task: Task): EitherT[Future, String, Task] =
     for {
       _ <- if (task.id.isEmpty) EitherT.rightT[Future, String]()
       else EitherT.leftT[Future, Unit]("task id supplied")
       taskId = UUID.randomUUID()
-      taskWithId = task.copy(id = Some(taskId))
-      _ <- EitherT.right(db.run(repositories.tasks.insert(taskWithId)))
-    } yield taskWithId
+      taskWithIds = task.copy(id = Some(taskId), userId = Some(userId))
+      _ <- EitherT.right(db.run(repositories.tasks.insert(taskWithIds)))
+    } yield taskWithIds
 
   def update(taskId: UUID, task: Task): EitherT[Future, String, Task] =
     for {
