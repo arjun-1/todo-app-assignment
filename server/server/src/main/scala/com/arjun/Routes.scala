@@ -48,7 +48,12 @@ trait Routes extends ArgonautSupport {
         completeResult(StatusCodes.OK, taskService.getByTaskId(taskId))
       } ~ put {
         entity(as[Task]) { task =>
-          completeResult(StatusCodes.OK, taskService.update(taskId, task))
+          completeResult(
+            StatusCodes.OK,
+            taskService.update(
+              taskId,
+              UUID.fromString("6d453fe9-09f7-442d-b50c-4487a8ea8db4"),
+              task))
         }
       } ~ delete {
         completeResult(StatusCodes.NoContent, taskService.delete(taskId))

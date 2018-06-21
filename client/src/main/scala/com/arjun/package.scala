@@ -10,4 +10,8 @@ package object arjun {
       task.id.fold(sys.error("no task id"))(id =>
         TaskFX(id, task.isDone, task.text))
   }
+
+  implicit class RichTaskFX(task: TaskFX) {
+    def toTask = Task(id = Some(task.id), None, task.isDone, task.text)
+  }
 }

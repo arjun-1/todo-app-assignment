@@ -27,7 +27,9 @@ class TaskService(repositories: Db, db: JdbcProfile#API#Database) {
       _ <- EitherT.right(db.run(repositories.tasks.insert(taskWithIds)))
     } yield taskWithIds
 
-  def update(taskId: UUID, task: Task): EitherT[Future, String, Task] =
+  def update(taskId: UUID,
+             userId: UUID,
+             task: Task): EitherT[Future, String, Task] =
     for {
       _ <- task.id
         .filter(_ != taskId)
@@ -35,8 +37,10 @@ class TaskService(repositories: Db, db: JdbcProfile#API#Database) {
           EitherT.leftT[Future, Unit](s"inconsistent task id $id != $taskId"))
         .getOrElse(EitherT.rightT[Future, String]())
       _ <- getByTaskId(taskId) // make sure it exists
-      _ <- EitherT.right(db.run(repositories.tasks.update(taskId, task)))
-    } yield task.copy(id = Some(taskId))
+      _ <- EitherT.right(
+        db.run(repositories.tasks
+          .update(taskId, task.copy(id = Some(taskId), userId = Some(userId)))))
+    } yield task.copy(id = Some(taskId), userId = Some(userId))
 
   def delete(id: UUID): EitherT[Future, String, Unit] = {
     for {

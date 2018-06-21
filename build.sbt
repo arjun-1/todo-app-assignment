@@ -40,12 +40,14 @@ lazy val client = (project in file("client"))
     commonSettings,
     name := "client",
     version := "0.1",
-    libraryDependencies += "org.scalafx" %% "scalafx" % "8.0.144-R12",
+    libraryDependencies ++=
+      Seq(
+        "org.scalafx" %% "scalafx" % "8.0.144-R12"),
     fork in run := true
   )
-  .dependsOn(serverserver)
+  .dependsOn(serverclient)
 
-lazy val root = (project in file(".")).aggregate(client, serverserver)
+lazy val root = (project in file(".")).aggregate(client, serverserver, serverclient)
 
 scalafmtOnCompile in ThisBuild := true
 scalacOptions += "-Ypartial-unification"
