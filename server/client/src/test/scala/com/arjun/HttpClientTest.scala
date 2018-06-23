@@ -6,12 +6,12 @@ import de.heikoseeberger.akkahttpargonaut.ArgonautSupport
 import scala.concurrent.Await
 import scala.concurrent.duration._
 object HttpClientTest extends App  {
-  val client = HttpClient
-
-    val task = Task(None, None, true, "")
-
-  val result1 = client.addTask(task)
-  println(Await.result(result1.value, 10 seconds))
+//  val client = HttpClient
+//
+//    val task = Task(None, None, true, "")
+//
+//  val result1 = client.addTask(task)
+//  println(Await.result(result1.value, 10 seconds))
 
 //  val string =
 //  """

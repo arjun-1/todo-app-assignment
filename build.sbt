@@ -42,7 +42,12 @@ lazy val client = (project in file("client"))
     version := "0.1",
     libraryDependencies ++=
       Seq(
-        "org.scalafx" %% "scalafx" % "8.0.144-R12"),
+        "org.scalafx" %% "scalafx" % "8.0.144-R12",
+        "org.scalatest" %% "scalatest" % "3.0.5" % Test,
+        "org.scalamock" %% "scalamock" % "4.1.0" % Test,
+        "org.testfx" % "testfx-core" % "4.0.13-alpha" % Test,
+        "org.testfx" % "testfx-junit" % "4.0.13-alpha" % Test
+      ),
     fork in run := true
   )
   .dependsOn(serverclient)

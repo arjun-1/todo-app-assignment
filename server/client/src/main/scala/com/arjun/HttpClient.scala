@@ -18,7 +18,7 @@ import de.heikoseeberger.akkahttpargonaut.ArgonautSupport
 
 import scala.concurrent.{Await, Future}
 
-object HttpClient extends ArgonautSupport {
+class HttpClient extends ArgonautSupport with HttpClientTrait {
 
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
