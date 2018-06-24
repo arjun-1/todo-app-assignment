@@ -25,10 +25,10 @@ class Presenter(view: View,
       futureTaskFX.onComplete {
         case Success(taskFX) =>
           subscribeToIsDone(taskFX)
-//          Platform.runLater {
-          model.set(model.indexOf(task), taskFX)
-          println(model)
-//          }
+          Platform.runLater {
+            model.set(model.indexOf(task), taskFX)
+            println(model)
+          }
         case Failure(err) =>
           sys.error(s"while updating: ${err.getLocalizedMessage}")
       }
@@ -42,25 +42,26 @@ class Presenter(view: View,
     tasksFX.onComplete {
       case Success(tasksFX) =>
         tasksFX.foreach(subscribeToIsDone)
-//        Platform.runLater {
+        Platform.runLater {
         model.setAll(tasksFX: _*)
 //          model.foreach(subscribeToIsDone)
-//        }
+        println(model)
+        }
 
       case Failure(err) =>
         sys.error(s"while fetching: ${err.getLocalizedMessage}")
     }
   }
 
-  Platform.runLater {
+//  Platform.runLater {
     refreshTasks()
-  }
+//  }
 
   val createHandler: EventHandler[ActionEvent] = (_: ActionEvent) => {
     System.out.println("Create")
     val task = Task(id = None, userId = None, isDone = false, text = "")
 
-    Platform.runLater {
+//    Platform.runLater {
       val futureTaskFX = httpClient
         .addTask(task)
         .map(_.toTaskFX)
@@ -75,28 +76,28 @@ class Presenter(view: View,
         case Failure(err) =>
           sys.error(s"while creating: ${err.getLocalizedMessage}")
       }
-    }
+//    }
 
   }
 
   val deleteHandler: EventHandler[ActionEvent] = (_: ActionEvent) => {
     println("Delete")
-    val row = view.table.getFocusModel.getFocusedCell.getRow
+    val row = view.getFocusedTableRow
     if (row >= 0) {
-      Platform.runLater {
+//      Platform.runLater {
         val futureTaskFX = httpClient
           .deleteTask(model.get(row).id)
           .fold(err => sys.error(s"while deleting: $err"), identity)
         futureTaskFX.onComplete {
           case Success(_) =>
-            //          Platform.runLater {
+          Platform.runLater {
             model.remove(row)
             println(model)
-          //          }
+          }
           case Failure(err) =>
             sys.error(s"while deleting: ${err.getLocalizedMessage}")
         }
-      }
+//      }
     }
   }
 
@@ -109,7 +110,7 @@ class Presenter(view: View,
       val row = cellEditEvent.getTablePosition.getRow
       val newText = cellEditEvent.getNewValue
 
-      Platform.runLater {
+//      Platform.runLater {
         val futureTaskFX = httpClient
           .updateTask(task.id, task.copy(text = newText).toTask)
           .map(_.toTaskFX)
@@ -117,14 +118,14 @@ class Presenter(view: View,
         futureTaskFX.onComplete {
           case Success(taskFX) =>
             subscribeToIsDone(taskFX)
-            //          Platform.runLater {
-            model.set(row, taskFX)
-            println(model)
-          //          }
+            Platform.runLater {
+              model.set(row, taskFX)
+              println(model)
+            }
           case Failure(err) =>
             sys.error(s"while updating: ${err.getLocalizedMessage}")
         }
-      }
+//      }
     }
 
   view.createButton.onAction = createHandler

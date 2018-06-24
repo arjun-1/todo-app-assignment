@@ -14,7 +14,7 @@ import scalafx.collections.ObservableBuffer
 import org.scalatest._
 import scalafx.application.JFXApp
 import scalafx.event.ActionEvent
-import org.testfx.framework.junit.ApplicationTest
+//import org.testfx.framework.junit.ApplicationTest
 import cats.instances.future._
 import org.scalatest.concurrent.Eventually
 
@@ -25,6 +25,12 @@ class PresenterTest
     with Matchers
     with MockFactory
     with Eventually {
+
+  import scala.concurrent.duration._
+  override implicit val patienceConfig = PatienceConfig(
+    timeout = scaled(10 seconds),
+    interval = scaled(100 millis)
+  )
 
   val uuid1 = UUID.fromString("899876ee-db27-41fc-bfee-3d75715fbab0")
   val uuid2 = UUID.fromString("4206ed51-fc07-4ef3-8521-c7939b327cd0")
@@ -82,6 +88,22 @@ class PresenterTest
           tasks.map(_.toTaskFX) :+ TaskFX(id = uuidNew,
                                           isDone = false,
                                           text = "")
+        )
+      }
+
+    }
+  }
+
+  "deleteHandler" should {
+    "delete a task" in new ModelFixture {
+      (viewMock.getFocusedTableRow: () => Int).expects().returns(0)
+
+      val presenter = new Presenter(viewMock, tasksFX, new SimpleHttpClient)
+      val event = new ActionEvent()
+      presenter.deleteHandler.handle(event)
+      eventually {
+        tasksFX.toList should be(
+          tasks.map(_.toTaskFX).drop(1)
         )
       }
 

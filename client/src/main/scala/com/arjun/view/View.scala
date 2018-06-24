@@ -39,6 +39,9 @@ class View(model: ObservableBuffer[TaskFX]) {
     columnResizePolicy = TableView.ConstrainedResizePolicy
   }
 
+  // For unit testing
+  def getFocusedTableRow() = table.getFocusModel.getFocusedCell.getRow
+
   val hBox = new HBox(createButton)
   val vbox = new VBox(table, hBox)
 }
