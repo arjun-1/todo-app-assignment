@@ -43,9 +43,9 @@ class Presenter(view: View,
       case Success(tasksFX) =>
         tasksFX.foreach(subscribeToIsDone)
         Platform.runLater {
-        model.setAll(tasksFX: _*)
+          model.setAll(tasksFX: _*)
 //          model.foreach(subscribeToIsDone)
-        println(model)
+          println(model)
         }
 
       case Failure(err) =>
@@ -54,7 +54,7 @@ class Presenter(view: View,
   }
 
 //  Platform.runLater {
-    refreshTasks()
+  refreshTasks()
 //  }
 
   val createHandler: EventHandler[ActionEvent] = (_: ActionEvent) => {
@@ -62,20 +62,20 @@ class Presenter(view: View,
     val task = Task(id = None, userId = None, isDone = false, text = "")
 
 //    Platform.runLater {
-      val futureTaskFX = httpClient
-        .addTask(task)
-        .map(_.toTaskFX)
-        .fold(err => sys.error(s"while creating: $err"), identity)
-      futureTaskFX.onComplete {
-        case Success(taskFX) =>
-          subscribeToIsDone(taskFX)
-          Platform.runLater {
-            model += taskFX
-            println(model)
-          }
-        case Failure(err) =>
-          sys.error(s"while creating: ${err.getLocalizedMessage}")
-      }
+    val futureTaskFX = httpClient
+      .addTask(task)
+      .map(_.toTaskFX)
+      .fold(err => sys.error(s"while creating: $err"), identity)
+    futureTaskFX.onComplete {
+      case Success(taskFX) =>
+        subscribeToIsDone(taskFX)
+        Platform.runLater {
+          model += taskFX
+          println(model)
+        }
+      case Failure(err) =>
+        sys.error(s"while creating: ${err.getLocalizedMessage}")
+    }
 //    }
 
   }
@@ -85,18 +85,18 @@ class Presenter(view: View,
     val row = view.getFocusedTableRow
     if (row >= 0) {
 //      Platform.runLater {
-        val futureTaskFX = httpClient
-          .deleteTask(model.get(row).id)
-          .fold(err => sys.error(s"while deleting: $err"), identity)
-        futureTaskFX.onComplete {
-          case Success(_) =>
+      val futureTaskFX = httpClient
+        .deleteTask(model.get(row).id)
+        .fold(err => sys.error(s"while deleting: $err"), identity)
+      futureTaskFX.onComplete {
+        case Success(_) =>
           Platform.runLater {
             model.remove(row)
             println(model)
           }
-          case Failure(err) =>
-            sys.error(s"while deleting: ${err.getLocalizedMessage}")
-        }
+        case Failure(err) =>
+          sys.error(s"while deleting: ${err.getLocalizedMessage}")
+      }
 //      }
     }
   }
@@ -105,31 +105,32 @@ class Presenter(view: View,
     javafx.scene.control.TableColumn.CellEditEvent[TaskFX, String]] =
     (cellEditEvent: javafx.scene.control.TableColumn.CellEditEvent[TaskFX,
                                                                    String]) => {
+
       println("Edit text")
       val task = cellEditEvent.getRowValue
       val row = cellEditEvent.getTablePosition.getRow
       val newText = cellEditEvent.getNewValue
 
 //      Platform.runLater {
-        val futureTaskFX = httpClient
-          .updateTask(task.id, task.copy(text = newText).toTask)
-          .map(_.toTaskFX)
-          .fold(err => sys.error(s"while updating: $err"), identity)
-        futureTaskFX.onComplete {
-          case Success(taskFX) =>
-            subscribeToIsDone(taskFX)
-            Platform.runLater {
-              model.set(row, taskFX)
-              println(model)
-            }
-          case Failure(err) =>
-            sys.error(s"while updating: ${err.getLocalizedMessage}")
-        }
+      val futureTaskFX = httpClient
+        .updateTask(task.id, task.copy(text = newText).toTask)
+        .map(_.toTaskFX)
+        .fold(err => sys.error(s"while updating: $err"), identity)
+      futureTaskFX.onComplete {
+        case Success(taskFX) =>
+          subscribeToIsDone(taskFX)
+          Platform.runLater {
+            model.set(row, taskFX)
+            println(model)
+          }
+        case Failure(err) =>
+          sys.error(s"while updating: ${err.getLocalizedMessage}")
+      }
 //      }
     }
 
   view.createButton.onAction = createHandler
-  view.deleteMenuItem.onAction = deleteHandler
+  view.deleteMenuItem.onAction_=(deleteHandler)
   view.textColumn.onEditCommit = editHandler
 
 }
