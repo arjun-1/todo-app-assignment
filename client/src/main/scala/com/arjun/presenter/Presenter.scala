@@ -130,7 +130,7 @@ class Presenter(view: View,
     }
 
   view.createButton.onAction = createHandler
-  view.deleteMenuItem.onAction_=(deleteHandler)
+  view.deleteMenuItem.onAction = deleteHandler
   view.textColumn.onEditCommit = editHandler
 
 }

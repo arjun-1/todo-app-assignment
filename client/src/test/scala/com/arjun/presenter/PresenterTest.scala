@@ -28,10 +28,7 @@ class PresenterTest
     extends WordSpec
     with Matchers
     with MockFactory
-//    with MockitoSugar
     with Eventually {
-
-//  import org.mockito.Mockito._
 
   import scala.concurrent.duration._
   override implicit val patienceConfig = PatienceConfig(
@@ -56,11 +53,8 @@ class PresenterTest
   }
 
   val _ = new JFXPanel
-  val viewMock = {
-  mock[View]
-//    mock(classOf[View])
-  }
-
+  val viewMock = mock[View]
+  
 
   class SimpleHttpClient extends HttpClientTrait {
     import scala.concurrent.ExecutionContext.Implicits.global
@@ -87,81 +81,52 @@ class PresenterTest
       EitherT.rightT[Future, String]()
   }
 
-//  "createHandler" should {
-//    "create a new task" in new ModelFixture {
-//      val presenter = new Presenter(viewMock, tasksFX, new SimpleHttpClient)
-//      val event = new ActionEvent()
-//      presenter.createHandler.handle(event)
-//      eventually {
-//        tasksFX.toList should be(
-//          tasks.map(_.toTaskFX) :+ TaskFX(id = uuidNew,
-//                                          isDone = false,
-//                                          text = "")
-//        )
-//      }
-//
-//    }
-//  }
-//
-//  "deleteHandler" should {
-//    "delete a task" in new ModelFixture {
-//      (viewMock.getFocusedTableRow: () => Int).expects().returns(0)
-//
-//      val presenter = new Presenter(viewMock, tasksFX, new SimpleHttpClient)
-//      val event = new ActionEvent()
-//      presenter.deleteHandler.handle(event)
-//      eventually {
-//        tasksFX.toList should be(
-//          tasks.map(_.toTaskFX).drop(1)
-//        )
-//      }
-//
-//    }
-//  }
+  "createHandler" should {
+    "create a new task" in new ModelFixture {
+      val presenter = new Presenter(viewMock, tasksFX, new SimpleHttpClient)
+      val event = new ActionEvent()
+      presenter.createHandler.handle(event)
+      eventually {
+        tasksFX.toList should be(
+          tasks.map(_.toTaskFX) :+ TaskFX(id = uuidNew,
+                                          isDone = false,
+                                          text = "")
+        )
+      }
 
+    }
+  }
 
+  "deleteHandler" should {
+    "delete a task" in new ModelFixture {
+      (viewMock.getFocusedTableRow: () => Int).expects().returns(0)
 
+      val presenter = new Presenter(viewMock, tasksFX, new SimpleHttpClient)
+      val event = new ActionEvent()
+      presenter.deleteHandler.handle(event)
+      eventually {
+        tasksFX.toList should be(
+          tasks.map(_.toTaskFX).drop(1)
+        )
+      }
+    }
+  }
 
   "editHandler" should {
     "edit a task" in new ModelFixture {
 
-//      val tableView = new TableView[TaskFX]
-//      val tableColumn = new TableColumn[TaskFX, String]
-
-
-
-//      val mockCellEditEvent = mock[CellEditEvent[TaskFX, String]]
-//
-//      (mockTablePosition.getRow: () => Int).expects().returns(0)
-//        when(mockTablePosition.getRow()).thenReturn(0)
-//      (mockCellEditEvent.getRowValue: () => TaskFX).expects().returns(tasks.head.toTaskFX)
-//      when(mockCellEditEvent.getRowValue).thenReturn(tasks.head.toTaskFX)
-//      (mockCellEditEvent.getNewValue: () => String).expects().returns("my new value")
-//      when(mockCellEditEvent.getNewValue).thenReturn("my new value")
-//      (mockCellEditEvent.getTablePosition: () => TablePosition[TaskFX, String]).expects().returns(pos)
-//      when(mockCellEditEvent.getTablePosition).thenReturn(mockTablePosition)
-
+      val newText = "my new value"
       val view = new View(tasksFX)
-
-
       val eventType = new EventType[TableColumn.CellEditEvent[TaskFX, String]](Event.ANY, "TABLE_COLUMN_EDIT1")
-
-
       val pos = new TablePosition[TaskFX, String](view.table, 0, view.textColumn)
-
-      //      val mockTablePosition = mock(classOf[TablePosition[TaskFX, String]])
-      //      val mockTablePosition = mock[Foo[TaskFX, String]]
-      //      val mockCellEditEvent = mock(classOf[javafx.scene.control.TableColumn.CellEditEvent[TaskFX, String]])
-
-
-      val cellEditEvent = new CellEditEvent[TaskFX, String](viewMock.table, pos, eventType, "my new value")
+      val cellEditEvent = new CellEditEvent[TaskFX, String](viewMock.table, pos, eventType, newText)
 
       val presenter = new Presenter(viewMock, tasksFX, new SimpleHttpClient)
       val event = new ActionEvent()
       presenter.editHandler.handle(cellEditEvent)
       eventually {
         tasksFX.toList should be(
-          tasks.map(_.toTaskFX).updated(0, tasks.head.copy(text = "my new value").toTaskFX)
+          tasks.map(_.toTaskFX).updated(0, tasks.head.copy(text = newText).toTaskFX)
         )
       }
 
