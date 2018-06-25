@@ -18,7 +18,8 @@ lazy val serverserver = (project in file("server/server"))
       "com.typesafe.slick" %% "slick-hikaricp" % "3.2.3",
       "com.h2database" % "h2" % "1.4.197",
       "org.postgresql" % "postgresql" % "42.2.2",
-      "org.flywaydb" % "flyway-core" % "5.1.1"
+      "org.flywaydb" % "flyway-core" % "5.1.1",
+      "com.github.pureconfig" %% "pureconfig" % "0.9.1"
     )
   )
 lazy val serverclient = (project in file("server/client"))
@@ -36,17 +37,19 @@ lazy val serverclient = (project in file("server/client"))
   ).dependsOn(serverserver)
 
 lazy val client = (project in file("client"))
+  .configs(IntegrationTest)
   .settings(
     commonSettings,
     name := "client",
     version := "0.1",
+    Defaults.itSettings,
     libraryDependencies ++=
       Seq(
         "org.scalafx" %% "scalafx" % "8.0.144-R12",
         "org.scalatest" %% "scalatest" % "3.0.5" % Test,
         "org.scalamock" %% "scalamock" % "4.1.0" % Test,
-        "org.testfx" % "testfx-core" % "4.0.13-alpha" % Test,
-        "org.testfx" % "testfx-junit" % "4.0.13-alpha" % Test
+        "org.testfx" % "testfx-core" % "4.0.13-alpha" % IntegrationTest,
+        "org.testfx" % "testfx-junit" % "4.0.13-alpha" % IntegrationTest
       ),
     fork in run := true
   )

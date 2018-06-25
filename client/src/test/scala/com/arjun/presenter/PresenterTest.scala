@@ -54,7 +54,7 @@ class PresenterTest
 
   val _ = new JFXPanel
   val viewMock = mock[View]
-  
+
 
   class SimpleHttpClient extends HttpClientTrait {
     import scala.concurrent.ExecutionContext.Implicits.global

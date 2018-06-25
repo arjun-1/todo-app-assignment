@@ -3,10 +3,16 @@ package com.arjun
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
+import com.typesafe.config.ConfigFactory
 import com.zaxxer.hikari.HikariDataSource
 import org.flywaydb.core.Flyway
 
 object Runner extends App with Routes {
+
+  val databaseConfig = pureconfig
+    .loadConfig[Configs.Main](ConfigFactory.load())
+    .fold(err => sys.error(s"Error while loading config: $err"), identity)
+    .database
 
   val dataSource = new HikariDataSource()
 //  dataSource.setJdbcUrl("jdbc:h2:mem:test1;DATABASE_TO_UPPER=false")
@@ -14,10 +20,10 @@ object Runner extends App with Routes {
 //  dataSource.setUsername("")
 //  dataSource.setPassword("")
 
-  dataSource.setJdbcUrl("jdbc:postgresql://localhost:5432/postgres")
-  dataSource.setDriverClassName("org.postgresql.Driver")
-  dataSource.setUsername("postgres")
-  dataSource.setPassword("postgres")
+  dataSource.setJdbcUrl(databaseConfig.url)
+  dataSource.setDriverClassName(databaseConfig.driverClassName)
+  dataSource.setUsername(databaseConfig.username)
+  dataSource.setPassword(databaseConfig.password)
 
   val flyway = new Flyway()
   flyway.setDataSource(dataSource)
@@ -27,9 +33,15 @@ object Runner extends App with Routes {
   implicit val materializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
 
-  val repositories = new Db(slick.jdbc.PostgresProfile)
-  val db =
-    slick.jdbc.PostgresProfile.api.Database.forDataSource(dataSource, None)
+  val (repositories, db) = databaseConfig.driverClassName match {
+    case "org.postgresql.Driver" =>
+      new Db(slick.jdbc.PostgresProfile) -> slick.jdbc.PostgresProfile.api.Database
+        .forDataSource(dataSource, None)
+    case "org.h2.Driver" =>
+      new Db(slick.jdbc.H2Profile) -> slick.jdbc.H2Profile.api.Database
+        .forDataSource(dataSource, None)
+  }
+
   val taskService = new TaskService(repositories, db)
   Http().bindAndHandle(route, "localhost", 8080)
 }
