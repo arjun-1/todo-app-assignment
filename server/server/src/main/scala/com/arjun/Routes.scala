@@ -9,6 +9,7 @@ import argonaut.Argonaut._
 import argonaut.ArgonautShapeless._
 import argonaut._
 import cats.data.EitherT
+import com.arjun.TaskError.TaskNotFound
 import de.heikoseeberger.akkahttpargonaut.ArgonautSupport
 
 import scala.concurrent.Future
@@ -18,13 +19,19 @@ trait Routes extends ArgonautSupport {
 
   def taskService: TaskService
 
+  def errorMapper(taskError: TaskError): StatusCode = taskError match {
+    case TaskError.TaskNotFound(_) => StatusCodes.NotFound
+    case TaskError.InconsistentTaskId(_, _) => StatusCodes.BadRequest
+    case TaskError.TaskIdSupplied => StatusCodes.BadRequest
+  }
+  
   def completeResult[A](
       statusCode: StatusCode,
-      result: EitherT[Future, String, A])(implicit encoder: EncodeJson[A]) =
+      result: EitherT[Future, TaskError, A])(implicit encoder: EncodeJson[A]) =
     onComplete(result.value) {
       case Success(Right(success)) => complete(statusCode -> success)
       case Success(Left(error)) =>
-        complete(StatusCodes.InternalServerError -> error)
+        complete(errorMapper(error))
       case Failure(error) =>
         complete(StatusCodes.InternalServerError -> error.getLocalizedMessage)
     }
