@@ -29,7 +29,7 @@ trait Routes extends ArgonautSupport {
         complete(StatusCodes.InternalServerError -> error.getLocalizedMessage)
     }
 
-  val route = {
+  val routes = {
     path("tasks") {
       get {
         completeResult(StatusCodes.OK, taskService.get())

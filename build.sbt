@@ -13,6 +13,7 @@ lazy val serverserver = (project in file("server/server"))
       "com.github.alexarchambault" %% "argonaut-shapeless_6.2" % "1.2.0-M4",
       "com.typesafe.akka" %% "akka-http" % "10.1.3",
       "com.typesafe.akka" %% "akka-http-testkit" % "10.1.3" % Test,
+      "org.scalatest" %% "scalatest" % "3.0.5" % Test,
       "com.typesafe.slick" %% "slick" % "3.2.3",
       "org.slf4j" % "slf4j-nop" % "1.6.4",
       "com.typesafe.slick" %% "slick-hikaricp" % "3.2.3",

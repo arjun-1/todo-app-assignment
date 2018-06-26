@@ -33,15 +33,10 @@ object Runner extends App with Routes {
   implicit val materializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
 
-  val (repositories, db) = databaseConfig.driverClassName match {
-    case "org.postgresql.Driver" =>
+  val (repositories, db) =
       new Db(slick.jdbc.PostgresProfile) -> slick.jdbc.PostgresProfile.api.Database
         .forDataSource(dataSource, None)
-    case "org.h2.Driver" =>
-      new Db(slick.jdbc.H2Profile) -> slick.jdbc.H2Profile.api.Database
-        .forDataSource(dataSource, None)
-  }
 
   val taskService = new TaskService(repositories, db)
-  Http().bindAndHandle(route, "localhost", 8080)
+  Http().bindAndHandle(routes, "localhost", 8080)
 }
