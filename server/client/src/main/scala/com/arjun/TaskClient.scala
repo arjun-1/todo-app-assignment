@@ -7,7 +7,7 @@ import cats.data.EitherT
 
 import scala.concurrent.Future
 
-trait HttpClientTrait {
+trait TaskClient {
 
   def listTasks: EitherT[Future, String, List[Task]]
 

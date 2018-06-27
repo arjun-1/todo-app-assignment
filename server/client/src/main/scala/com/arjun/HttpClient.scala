@@ -16,13 +16,13 @@ import argonaut.ArgonautShapeless._
 import argonaut._
 import de.heikoseeberger.akkahttpargonaut.ArgonautSupport
 
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 
-class HttpClient extends ArgonautSupport with HttpClientTrait {
-
-  implicit val system = ActorSystem()
-  implicit val materializer = ActorMaterializer()
-  implicit val executionContext = system.dispatcher
+class HttpClient(implicit executionContext: ExecutionContext,
+                 actorMaterializer: ActorMaterializer,
+                 actorSystem: ActorSystem)
+    extends ArgonautSupport
+    with TaskClient {
 
   private def httpRequest(method: HttpMethod,
                           path: String,

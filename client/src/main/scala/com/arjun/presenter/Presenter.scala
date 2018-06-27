@@ -1,6 +1,6 @@
 package com.arjun.presenter
 
-import com.arjun.{HttpClient, HttpClientTrait, Task}
+import com.arjun.{HttpClient, TaskClient, Task}
 import com.arjun.model.TaskFX
 import com.arjun.view.View
 import javafx.event.{ActionEvent, EventHandler}
@@ -14,7 +14,7 @@ import scala.util.{Failure, Success}
 
 class Presenter(view: View,
                 model: ObservableBuffer[TaskFX],
-                httpClient: HttpClientTrait) {
+                httpClient: TaskClient) {
   def subscribeToIsDone(task: TaskFX): Subscription =
     task.isDoneProperty.onChange((_, _, newIsDone) => {
       println("Edit isDone")

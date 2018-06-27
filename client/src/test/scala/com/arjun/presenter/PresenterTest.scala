@@ -5,7 +5,7 @@ import java.util.UUID
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import cats.data.EitherT
-import com.arjun.{HttpClientTrait, Task}
+import com.arjun.{TaskClient, Task}
 import com.arjun.model.TaskFX
 import com.arjun.view.View
 import javafx.embed.swing.JFXPanel
@@ -56,7 +56,7 @@ class PresenterTest
   val viewMock = mock[View]
 
 
-  class SimpleHttpClient extends HttpClientTrait {
+  class HttpClientMock extends TaskClient {
     import scala.concurrent.ExecutionContext.Implicits.global
 
     override def getTaskByTaskId(taskId: UUID): EitherT[Future, String, Task] =
@@ -83,7 +83,7 @@ class PresenterTest
 
   "createHandler" should {
     "create a new task" in new ModelFixture {
-      val presenter = new Presenter(viewMock, tasksFX, new SimpleHttpClient)
+      val presenter = new Presenter(viewMock, tasksFX, new HttpClientMock)
       val event = new ActionEvent()
       presenter.createHandler.handle(event)
       eventually {
@@ -101,7 +101,7 @@ class PresenterTest
     "delete a task" in new ModelFixture {
       (viewMock.getFocusedTableRow: () => Int).expects().returns(0)
 
-      val presenter = new Presenter(viewMock, tasksFX, new SimpleHttpClient)
+      val presenter = new Presenter(viewMock, tasksFX, new HttpClientMock)
       val event = new ActionEvent()
       presenter.deleteHandler.handle(event)
       eventually {
@@ -117,11 +117,11 @@ class PresenterTest
 
       val newText = "my new value"
       val view = new View(tasksFX)
-      val eventType = new EventType[TableColumn.CellEditEvent[TaskFX, String]](Event.ANY, "TABLE_COLUMN_EDIT1")
+      val eventType = new EventType[TableColumn.CellEditEvent[TaskFX, String]](Event.ANY, "TABLE_COLUMN_EDIT_TEST")
       val pos = new TablePosition[TaskFX, String](view.table, 0, view.textColumn)
-      val cellEditEvent = new CellEditEvent[TaskFX, String](viewMock.table, pos, eventType, newText)
+      val cellEditEvent = new CellEditEvent[TaskFX, String](view.table, pos, eventType, newText)
 
-      val presenter = new Presenter(viewMock, tasksFX, new SimpleHttpClient)
+      val presenter = new Presenter(view, tasksFX, new HttpClientMock)
       val event = new ActionEvent()
       presenter.editHandler.handle(cellEditEvent)
       eventually {

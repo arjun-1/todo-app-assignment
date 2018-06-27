@@ -34,8 +34,10 @@ lazy val serverclient = (project in file("server/client"))
       "com.github.alexarchambault" %% "argonaut-shapeless_6.2" % "1.2.0-M4",
       "com.typesafe.akka" %% "akka-http" % "10.1.3",
       "com.typesafe.akka" %% "akka-http-testkit" % "10.1.3" % Test,
+      "org.scalatest" %% "scalatest" % "3.0.5" % Test
     )
-  ).dependsOn(serverserver)
+  )
+  .dependsOn(serverserver)
 
 lazy val client = (project in file("client"))
   .configs(IntegrationTest)
@@ -56,7 +58,8 @@ lazy val client = (project in file("client"))
   )
   .dependsOn(serverclient)
 
-lazy val root = (project in file(".")).aggregate(client, serverserver, serverclient)
+lazy val root =
+  (project in file(".")).aggregate(client, serverserver, serverclient)
 
 scalafmtOnCompile in ThisBuild := true
 scalacOptions += "-Ypartial-unification"

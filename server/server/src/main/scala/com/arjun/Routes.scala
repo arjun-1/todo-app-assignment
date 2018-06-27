@@ -17,14 +17,14 @@ import scala.util.{Failure, Success}
 
 trait Routes extends ArgonautSupport {
 
-  def taskService: TaskService
+  def taskService: TaskServiceTrait
 
   def errorMapper(taskError: TaskError): StatusCode = taskError match {
-    case TaskError.TaskNotFound(_) => StatusCodes.NotFound
+    case TaskError.TaskNotFound(_)          => StatusCodes.NotFound
     case TaskError.InconsistentTaskId(_, _) => StatusCodes.BadRequest
-    case TaskError.TaskIdSupplied => StatusCodes.BadRequest
+    case TaskError.TaskIdSupplied           => StatusCodes.BadRequest
   }
-  
+
   def completeResult[A](
       statusCode: StatusCode,
       result: EitherT[Future, TaskError, A])(implicit encoder: EncodeJson[A]) =

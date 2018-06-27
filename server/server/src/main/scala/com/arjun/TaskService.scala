@@ -6,16 +6,17 @@ import cats.data.EitherT
 import cats.instances.future._
 import slick.jdbc.JdbcProfile
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class TaskService(repositories: Db, db: JdbcProfile#API#Database) {
+class TaskService(repositories: Db, db: JdbcProfile#API#Database)(
+    implicit executionContext: ExecutionContext)
+    extends TaskServiceTrait {
 
   def get(): EitherT[Future, TaskError, List[Task]] =
     EitherT.right(db.run(repositories.tasks.get()).map(_.toList))
   def getByTaskId(taskId: UUID): EitherT[Future, TaskError, Task] =
     EitherT.fromOptionF(db.run(repositories.tasks.getByTaskId(taskId)),
-      TaskError.TaskNotFound(taskId))
+                        TaskError.TaskNotFound(taskId))
   def getByUserId(userID: UUID): EitherT[Future, TaskError, List[Task]] =
     EitherT.right(db.run(repositories.tasks.getByUserId(userID)).map(_.toList))
   def insert(userId: UUID, task: Task): EitherT[Future, TaskError, Task] =
