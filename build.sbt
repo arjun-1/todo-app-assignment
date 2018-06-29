@@ -2,18 +2,24 @@ import sbt.Keys.libraryDependencies
 
 lazy val commonSettings = Seq(scalaVersion := "2.12.6")
 
+val akkaHttpVersion = "10.1.3"
+val catsVersion = "1.0.1"
+val argonautShapelessVersion = "1.2.0-M4"
+val akkaHttpArgonautVersion = "1.21.0"
+val scalaTestVersion = "3.0.5"
+
 lazy val httpServer = (project in file("http/server"))
   .settings(
     commonSettings,
     name := "http-server",
     version := "0.1",
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-core" % "1.0.1",
-      "de.heikoseeberger" %% "akka-http-argonaut" % "1.21.0",
-      "com.github.alexarchambault" %% "argonaut-shapeless_6.2" % "1.2.0-M4",
-      "com.typesafe.akka" %% "akka-http" % "10.1.3",
-      "com.typesafe.akka" %% "akka-http-testkit" % "10.1.3" % Test,
-      "org.scalatest" %% "scalatest" % "3.0.5" % Test,
+      "org.typelevel" %% "cats-core" % catsVersion,
+      "de.heikoseeberger" %% "akka-http-argonaut" % akkaHttpArgonautVersion,
+      "com.github.alexarchambault" %% "argonaut-shapeless_6.2" % argonautShapelessVersion,
+      "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
+      "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
+      "org.scalatest" %% "scalatest" % scalaTestVersion % Test,
       "com.typesafe.slick" %% "slick" % "3.2.3",
       "org.slf4j" % "slf4j-nop" % "1.6.4",
       "com.typesafe.slick" %% "slick-hikaricp" % "3.2.3",
@@ -29,12 +35,12 @@ lazy val httpClient = (project in file("http/client"))
     name := "http-client",
     version := "0.1",
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-core" % "1.0.1",
-      "de.heikoseeberger" %% "akka-http-argonaut" % "1.21.0",
-      "com.github.alexarchambault" %% "argonaut-shapeless_6.2" % "1.2.0-M4",
-      "com.typesafe.akka" %% "akka-http" % "10.1.3",
-      "com.typesafe.akka" %% "akka-http-testkit" % "10.1.3" % Test,
-      "org.scalatest" %% "scalatest" % "3.0.5" % Test
+      "org.typelevel" %% "cats-core" % catsVersion,
+      "de.heikoseeberger" %% "akka-http-argonaut" % akkaHttpArgonautVersion,
+      "com.github.alexarchambault" %% "argonaut-shapeless_6.2" % argonautShapelessVersion,
+      "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
+      "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
+      "org.scalatest" %% "scalatest" % scalaTestVersion % Test
     )
   )
   .dependsOn(httpServer)
