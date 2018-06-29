@@ -12,6 +12,6 @@ package object arjun {
   }
 
   implicit class RichTaskFX(task: TaskFX) {
-    def toTask = Task(id = Some(task.id), None, task.isDone, task.text)
+    def toTask = Task(id = Some(task.id), task.isDone, task.text)
   }
 }

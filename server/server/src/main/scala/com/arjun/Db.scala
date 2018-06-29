@@ -10,12 +10,11 @@ class Db(profile: JdbcProfile) {
 
   private class Tasks(tag: Tag) extends Table[Task](tag, "tasks") {
     val id = column[UUID]("task_id", O.PrimaryKey)
-    val userId = column[UUID]("user_id")
     val isDone = column[Boolean]("is_done")
     val text = column[String]("text")
 
     def * =
-      (id.?, userId.?, isDone, text) <> ((Task.apply _).tupled, Task.unapply)
+      (id.?, isDone, text) <> ((Task.apply _).tupled, Task.unapply)
   }
 
   private val taskTable = TableQuery[Tasks]
@@ -24,8 +23,6 @@ class Db(profile: JdbcProfile) {
     def get(): DB[Seq[Task]] = taskTable.result
     def getByTaskId(taskId: UUID): DB[Option[Task]] =
       taskTable.filter(_.id === taskId).result.headOption
-    def getByUserId(userID: UUID): DB[Seq[Task]] =
-      taskTable.filter(_.userId === userID).result
     def update(taskId: UUID, task: Task): DB[Int] =
       taskTable.filter(_.id === taskId).update(task)
     def insert(task: Task): DB[Int] = taskTable += task

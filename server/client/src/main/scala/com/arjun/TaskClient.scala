@@ -19,5 +19,4 @@ trait TaskClient {
 
   def getTaskByTaskId(taskId: UUID): EitherT[Future, String, Task]
 
-  def listTasksByUserId(userId: UUID): EitherT[Future, String, List[Task]]
 }

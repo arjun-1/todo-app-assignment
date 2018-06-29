@@ -42,12 +42,10 @@ trait Routes extends ArgonautSupport {
         completeResult(StatusCodes.OK, taskService.get())
       } ~ post {
         entity(as[Task]) { task =>
-          // Todo: extract userId from auth header
           completeResult(
             StatusCodes.OK,
-            taskService.insert(
-              UUID.fromString("6d453fe9-09f7-442d-b50c-4487a8ea8db4"),
-              task))
+            taskService.insert(task)
+          )
         }
       }
     } ~ path("tasks" / PathMatchers.JavaUUID) { taskId =>
@@ -55,18 +53,11 @@ trait Routes extends ArgonautSupport {
         completeResult(StatusCodes.OK, taskService.getByTaskId(taskId))
       } ~ put {
         entity(as[Task]) { task =>
-          completeResult(
-            StatusCodes.OK,
-            taskService.update(
-              taskId,
-              UUID.fromString("6d453fe9-09f7-442d-b50c-4487a8ea8db4"),
-              task))
+          completeResult(StatusCodes.OK, taskService.update(taskId, task))
         }
       } ~ delete {
         completeResult(StatusCodes.NoContent, taskService.delete(taskId))
       }
-    } ~ path("users" / PathMatchers.JavaUUID / "tasks") { userId =>
-      completeResult(StatusCodes.OK, taskService.getByUserId(userId))
     }
   }
 

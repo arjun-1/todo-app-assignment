@@ -42,9 +42,9 @@ class PresenterTest
 
   val uuidNew = UUID.fromString("9932d41d-ad09-4a79-b1a9-de28b941a7b9")
   val tasks = List(
-    Task(id = Some(uuid1), None, true, "hoi"),
-    Task(Some(uuid2), None, false, "doei"),
-    Task(Some(uuid2), None, false, "doei2")
+    Task(id = Some(uuid1), true, "hoi"),
+    Task(Some(uuid2), false, "doei"),
+    Task(Some(uuid2), false, "doei2")
   )
   trait ModelFixture {
     val tasksFX = ObservableBuffer[TaskFX](
@@ -55,20 +55,15 @@ class PresenterTest
   val _ = new JFXPanel
   val viewMock = mock[View]
 
-
   class HttpClientMock extends TaskClient {
     import scala.concurrent.ExecutionContext.Implicits.global
 
     override def getTaskByTaskId(taskId: UUID): EitherT[Future, String, Task] =
       EitherT.rightT[Future, String](
-        Task(id = Some(taskId), userId = None, isDone = true, text = ""))
+        Task(id = Some(taskId), isDone = true, text = ""))
 
     override def addTask(task: Task): EitherT[Future, String, Task] =
       EitherT.rightT[Future, String](task.copy(id = Some(uuidNew)))
-
-    override def listTasksByUserId(
-        userId: UUID): EitherT[Future, String, List[Task]] =
-      EitherT.rightT[Future, String](tasks)
 
     override def updateTask(taskId: UUID,
                             task: Task): EitherT[Future, String, Task] =
@@ -117,16 +112,22 @@ class PresenterTest
 
       val newText = "my new value"
       val view = new View(tasksFX)
-      val eventType = new EventType[TableColumn.CellEditEvent[TaskFX, String]](Event.ANY, "TABLE_COLUMN_EDIT_TEST")
-      val pos = new TablePosition[TaskFX, String](view.table, 0, view.textColumn)
-      val cellEditEvent = new CellEditEvent[TaskFX, String](view.table, pos, eventType, newText)
+      val eventType = new EventType[TableColumn.CellEditEvent[TaskFX, String]](
+        Event.ANY,
+        "TABLE_COLUMN_EDIT_TEST")
+      val pos =
+        new TablePosition[TaskFX, String](view.table, 0, view.textColumn)
+      val cellEditEvent =
+        new CellEditEvent[TaskFX, String](view.table, pos, eventType, newText)
 
       val presenter = new Presenter(view, tasksFX, new HttpClientMock)
       val event = new ActionEvent()
       presenter.editHandler.handle(cellEditEvent)
       eventually {
         tasksFX.toList should be(
-          tasks.map(_.toTaskFX).updated(0, tasks.head.copy(text = newText).toTaskFX)
+          tasks
+            .map(_.toTaskFX)
+            .updated(0, tasks.head.copy(text = newText).toTaskFX)
         )
       }
 

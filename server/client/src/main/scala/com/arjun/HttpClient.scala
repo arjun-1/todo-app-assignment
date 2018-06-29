@@ -94,12 +94,4 @@ class HttpClient(implicit executionContext: ExecutionContext,
     } yield task
   }
 
-  def listTasksByUserId(userId: UUID): EitherT[Future, String, List[Task]] = {
-    for {
-      response <- EitherT.right(
-        httpRequest(HttpMethods.GET, s"/users/$userId/tasks", HttpEntity.Empty))
-      tasks <- unmarshall[List[Task]](response.entity)
-    } yield tasks
-  }
-
 }

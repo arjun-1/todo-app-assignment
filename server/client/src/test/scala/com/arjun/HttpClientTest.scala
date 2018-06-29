@@ -17,17 +17,17 @@ import org.scalatest.concurrent.{Futures, ScalaFutures}
 import org.scalatest.time.{Millis, Seconds, Span}
 import MockData.{task, _}
 
-
-
-class HttpClientTest extends WordSpec with Matchers with Routes with ScalaFutures with BeforeAndAfterAll with EitherValues  {
+class HttpClientTest
+    extends WordSpec
+    with Matchers
+    with Routes
+    with ScalaFutures
+    with BeforeAndAfterAll
+    with EitherValues {
 
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
-
-
-
-
 
   override protected def afterAll(): Unit = {
     Await.ready(system.terminate(), 10 seconds)
@@ -49,7 +49,6 @@ class HttpClientTest extends WordSpec with Matchers with Routes with ScalaFuture
       } yield tasks
       whenReady(result) { x =>
         x.right.value shouldBe List(task)
-
       }
     }
 
@@ -60,7 +59,6 @@ class HttpClientTest extends WordSpec with Matchers with Routes with ScalaFuture
       } yield task
       whenReady(result) { x =>
         x.right.value shouldBe task
-
       }
     }
 
@@ -71,7 +69,6 @@ class HttpClientTest extends WordSpec with Matchers with Routes with ScalaFuture
       } yield task
       whenReady(result) { x =>
         x.right.value shouldBe task
-
       }
     }
 
@@ -82,7 +79,6 @@ class HttpClientTest extends WordSpec with Matchers with Routes with ScalaFuture
       } yield result
       whenReady(result) { x =>
         x.right.value shouldBe ()
-
       }
     }
 
@@ -93,10 +89,8 @@ class HttpClientTest extends WordSpec with Matchers with Routes with ScalaFuture
       } yield task
       whenReady(result) { x =>
         x.right.value shouldBe task
-
       }
     }
   }
-
 
 }
