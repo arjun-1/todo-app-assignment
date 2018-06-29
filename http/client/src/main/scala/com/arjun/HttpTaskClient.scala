@@ -18,9 +18,9 @@ import de.heikoseeberger.akkahttpargonaut.ArgonautSupport
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 
-class HttpClient(implicit executionContext: ExecutionContext,
-                 actorMaterializer: ActorMaterializer,
-                 actorSystem: ActorSystem)
+class HttpTaskClient(implicit executionContext: ExecutionContext,
+                     actorMaterializer: ActorMaterializer,
+                     actorSystem: ActorSystem)
     extends ArgonautSupport
     with TaskClient {
 

@@ -17,7 +17,7 @@ import org.scalatest.concurrent.{Futures, ScalaFutures}
 import org.scalatest.time.{Millis, Seconds, Span}
 import MockData.{task, _}
 
-class HttpClientTest
+class HttpTaskClientTest
     extends WordSpec
     with Matchers
     with Routes
@@ -36,7 +36,7 @@ class HttpClientTest
   val taskService = new MockTaskService
   val server = Http().bindAndHandle(routes, "localhost", 8080)
 
-  val httpClient = new HttpClient
+  val httpClient = new HttpTaskClient
 
   override implicit val patienceConfig =
     PatienceConfig(timeout = Span(2, Seconds), interval = Span(5, Millis))
@@ -47,8 +47,8 @@ class HttpClientTest
         _ <- server
         tasks <- httpClient.listTasks.value
       } yield tasks
-      whenReady(result) { x =>
-        x.right.value shouldBe List(task)
+      whenReady(result) {
+        _.right.value shouldBe List(task)
       }
     }
 
@@ -57,8 +57,8 @@ class HttpClientTest
         _ <- server
         task <- httpClient.addTask(task).value
       } yield task
-      whenReady(result) { x =>
-        x.right.value shouldBe task
+      whenReady(result) {
+        _.right.value shouldBe task
       }
     }
 
@@ -67,8 +67,8 @@ class HttpClientTest
         _ <- server
         task <- httpClient.updateTask(taskId, task).value
       } yield task
-      whenReady(result) { x =>
-        x.right.value shouldBe task
+      whenReady(result) {
+        _.right.value shouldBe task
       }
     }
 
@@ -77,8 +77,8 @@ class HttpClientTest
         _ <- server
         result <- httpClient.deleteTask(taskId).value
       } yield result
-      whenReady(result) { x =>
-        x.right.value shouldBe ()
+      whenReady(result) {
+        _.right.value shouldBe ()
       }
     }
 
@@ -87,8 +87,8 @@ class HttpClientTest
         _ <- server
         task <- httpClient.getTaskByTaskId(taskId).value
       } yield task
-      whenReady(result) { x =>
-        x.right.value shouldBe task
+      whenReady(result) {
+        _.right.value shouldBe task
       }
     }
   }

@@ -19,7 +19,7 @@ object Main extends JFXApp {
   val tasks: ObservableBuffer[TaskFX] = ObservableBuffer[TaskFX]()
   val view = new View(tasks)
 
-  val presenter = new Presenter(view, tasks, new HttpClient)
+  val presenter = new Presenter(view, tasks, new HttpTaskClient)
   stage = new PrimaryStage {
     title = "My application"
     scene = new Scene {

@@ -1,6 +1,6 @@
 package com.arjun.presenter
 
-import com.arjun.{HttpClient, TaskClient, Task}
+import com.arjun.{HttpTaskClient, TaskClient, Task}
 import com.arjun.model.TaskFX
 import com.arjun.view.View
 import javafx.event.{ActionEvent, EventHandler}
