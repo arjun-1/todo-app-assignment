@@ -2,10 +2,10 @@ import sbt.Keys.libraryDependencies
 
 lazy val commonSettings = Seq(scalaVersion := "2.12.6")
 
-lazy val serverserver = (project in file("server/server"))
+lazy val httpServer = (project in file("http/server"))
   .settings(
     commonSettings,
-    name := "serverserver",
+    name := "http-server",
     version := "0.1",
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-core" % "1.0.1",
@@ -23,10 +23,10 @@ lazy val serverserver = (project in file("server/server"))
       "com.github.pureconfig" %% "pureconfig" % "0.9.1"
     )
   )
-lazy val serverclient = (project in file("server/client"))
+lazy val httpClient = (project in file("http/client"))
   .settings(
     commonSettings,
-    name := "serverclient",
+    name := "http-client",
     version := "0.1",
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-core" % "1.0.1",
@@ -37,9 +37,9 @@ lazy val serverclient = (project in file("server/client"))
       "org.scalatest" %% "scalatest" % "3.0.5" % Test
     )
   )
-  .dependsOn(serverserver)
+  .dependsOn(httpServer)
 
-lazy val client = (project in file("client"))
+lazy val guiClient = (project in file("gui-client"))
   .settings(
     commonSettings,
     name := "client",
@@ -53,10 +53,10 @@ lazy val client = (project in file("client"))
       ),
     fork in run := true
   )
-  .dependsOn(serverclient)
+  .dependsOn(httpClient)
 
 lazy val root =
-  (project in file(".")).aggregate(client, serverserver, serverclient)
+  (project in file(".")).aggregate(guiClient, httpServer, httpClient)
 
 scalafmtOnCompile in ThisBuild := true
 scalacOptions += "-Ypartial-unification"
